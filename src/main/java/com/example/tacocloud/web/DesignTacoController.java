@@ -1,16 +1,15 @@
 package com.example.tacocloud.web;
 
-import com.example.tacocloud.Design;
-import com.example.tacocloud.Ingredient;
-import com.example.tacocloud.Order;
-import com.example.tacocloud.Taco;
+import com.example.tacocloud.*;
 import com.example.tacocloud.data.IngredientRepository;
+import com.example.tacocloud.data.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,23 +27,26 @@ import javax.validation.Valid;
 public class DesignTacoController {
 
     private final IngredientRepository ingredientRepository;
+    private final UserRepository userRepository;
 
-    public DesignTacoController(IngredientRepository ingredientRepository) {
+    public DesignTacoController(IngredientRepository ingredientRepository, UserRepository userRepository) {
         this.ingredientRepository = ingredientRepository;
+        this.userRepository = userRepository;
     }
+
 
     @ModelAttribute(name = "order")
     public Order order(){
         return new Order();
     }
 
-    @ModelAttribute(name = "taco")
+    @ModelAttribute(name = "design")
     public Taco taco(){
         return new Taco();
     }
 
     @GetMapping
-    public String showDesignForm(Model model){
+    public String showDesignForm(Model model, Principal principal){
         List<Ingredient> ingredients = new ArrayList<>();
         ingredientRepository.findAll().forEach(ingredients::add);
 
@@ -54,7 +56,9 @@ public class DesignTacoController {
             model.addAttribute(type.toString().toLowerCase(),
                     filterByType(ingredients,type));
         }
-        model.addAttribute("taco", new Taco());
+        System.out.println(principal.getName());
+        User user = userRepository.findByUsername(principal.getName());
+        model.addAttribute("user", user);
         System.out.println("Model = " + model.toString() + "\n\n\n\n");
         return "design";
     }
