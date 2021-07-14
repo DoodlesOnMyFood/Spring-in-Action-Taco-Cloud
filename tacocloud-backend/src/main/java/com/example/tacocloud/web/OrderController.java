@@ -1,65 +1,68 @@
 package com.example.tacocloud.web;
 
 import com.example.tacocloud.Order;
-import com.example.tacocloud.User;
 import com.example.tacocloud.data.OrderRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import java.util.List;
 
-
-@Slf4j
-@Controller
-@SessionAttributes("order")
-@RequestMapping("/orders")
-public class OrderController {
+@RestController
+@RequestMapping(path="/orders", produces = "application/json")
+@CrossOrigin(origins = "*")
+class OrderController{
 
     private final OrderRepository orderRepository;
-    private final OrderProp orderProp;
 
-    public OrderController(OrderRepository orderRepository, OrderProp orderProp) {
+    public OrderController(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
-        this.orderProp = orderProp;
     }
-
 
     @GetMapping
-    public String ordersForUser(@AuthenticationPrincipal User user, Model model){
+    public Iterable<Order> allOrders(){
+        return orderRepository.findAll();
+    }
 
-        Pageable pageable = PageRequest.of(0, orderProp.getPageSize());
-
-        model.addAttribute("orders", orderRepository.findByUserOrderByPlacedAtDesc(user, pageable));
-
-        return "orderList";
+    @PostMapping(consumes = "application/json")
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public Order postOrder(@RequestBody Order order){
+        return orderRepository.save(order);
     }
 
 
-    @GetMapping("/current")
-    public String orderForm(Model model){
-        System.out.println(model.toString());
-        return "orderForm";
+    @PutMapping(consumes = "application/json", path="/{id}")
+    public Order putOrder(@RequestBody Order order){
+        return orderRepository.save(order);
     }
-    @PostMapping
-    public String processOrder(@Valid Order order, BindingResult results, SessionStatus sessionStatus,
-                               @AuthenticationPrincipal User user){
-        if(results.hasErrors()){
-            return "orderForm";
-        }
-        order.setUser(user);
-        orderRepository.save(order);
-        sessionStatus.setComplete();
-        log.info("Order submitted : " + order);
-        return "redirect:/";
+
+    @PatchMapping(consumes = "application/json", path="/{id}")
+    public Order patchOrder(@RequestBody Order patch, @PathVariable Long id){
+        Order order = orderRepository.findById(id).get();
+        if(patch.getDeliveryName() != null)
+            order.setDeliveryName(patch.getDeliveryName());
+        if(patch.getState() != null)
+            order.setState(patch.getState());
+        if(patch.getStreet() != null)
+            order.setStreet(patch.getStreet());
+        if(patch.getCity() != null)
+            order.setCity(patch.getCity());
+        if(patch.getCcNumber() != null)
+            order.setCcNumber(patch.getCcNumber());
+        if(patch.getCcExpiration() != null)
+            order.setCcExpiration(patch.getCcExpiration());
+        if(patch.getCcCVV() != null)
+            order.setCcCVV(patch.getCcCVV());
+
+        return orderRepository.save(order);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteOrder(@PathVariable Long id){
+        try {
+            orderRepository.deleteById(id);
+        } catch(EmptyResultDataAccessException e){}
+    }
+
 }
