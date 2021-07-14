@@ -2,6 +2,7 @@ package com.example.tacocloud.web;
 
 import com.example.tacocloud.*;
 import com.example.tacocloud.data.IngredientRepository;
+import com.example.tacocloud.data.TacoRepository;
 import com.example.tacocloud.data.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -28,12 +29,13 @@ public class DesignTacoController {
 
     private final IngredientRepository ingredientRepository;
     private final UserRepository userRepository;
+    private final TacoRepository tacoRepository;
 
-    public DesignTacoController(IngredientRepository ingredientRepository, UserRepository userRepository) {
+    public DesignTacoController(IngredientRepository ingredientRepository, UserRepository userRepository, TacoRepository tacoRepository) {
         this.ingredientRepository = ingredientRepository;
         this.userRepository = userRepository;
+        this.tacoRepository = tacoRepository;
     }
-
 
     @ModelAttribute(name = "order")
     public Order order(){
@@ -75,7 +77,8 @@ public class DesignTacoController {
             log.error("Taco error : " + bindingResult.getAllErrors() + "\n\n\n\n");
             return "/design";
         }
-        order.getTacos().add(taco);
+
+        order.getTacos().add(tacoRepository.save(taco));
         log.info("Processing taco : " + taco);
         log.info("Check Order : " + order);
         return "redirect:/orders/current";

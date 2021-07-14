@@ -24,7 +24,7 @@ public class Order implements Serializable {
     private Long id;
     private Date placedAt;
     @NotBlank(message = "Name is required")
-    private String name;
+    private String deliveryName;
     @NotBlank(message = "Street is required")
     private String street;
     @NotBlank(message = "City is required")
