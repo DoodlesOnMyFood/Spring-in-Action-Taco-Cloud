@@ -1,4 +1,4 @@
-package com.example.tacocloud.web;
+package com.example.tacocloud.api;
 
 
 import lombok.Data;

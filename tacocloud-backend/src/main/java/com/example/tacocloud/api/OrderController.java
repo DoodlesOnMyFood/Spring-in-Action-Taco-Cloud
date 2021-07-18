@@ -1,12 +1,10 @@
-package com.example.tacocloud.web;
+package com.example.tacocloud.api;
 
 import com.example.tacocloud.Order;
 import com.example.tacocloud.data.OrderRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(path="/orders", produces = "application/json")

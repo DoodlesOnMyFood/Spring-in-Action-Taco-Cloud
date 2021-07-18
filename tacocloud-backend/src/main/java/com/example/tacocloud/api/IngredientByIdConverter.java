@@ -1,4 +1,4 @@
-package com.example.tacocloud.web;
+package com.example.tacocloud.api;
 
 import com.example.tacocloud.Ingredient;
 import com.example.tacocloud.data.IngredientRepository;

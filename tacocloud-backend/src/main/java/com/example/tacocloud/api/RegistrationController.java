@@ -1,4 +1,4 @@
-package com.example.tacocloud.web;
+package com.example.tacocloud.api;
 
 import com.example.tacocloud.data.UserRepository;
 import com.example.tacocloud.security.RegistrationForm;
