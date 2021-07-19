@@ -14,3 +14,9 @@ spring:
   jms:
     template:
       default-destination: tacocloud.order.queue
+
+  rabbitmq:
+    template:
+      exchange: tacocloud.orders
+      routing-key: kitchens.central
+      receive-timeout: 30000

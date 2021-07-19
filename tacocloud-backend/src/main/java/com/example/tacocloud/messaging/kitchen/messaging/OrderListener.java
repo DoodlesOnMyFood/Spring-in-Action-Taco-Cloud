@@ -2,7 +2,8 @@ package com.example.tacocloud.messaging.kitchen.messaging;
 
 import com.example.tacocloud.Order;
 import com.example.tacocloud.messaging.kitchen.KitchenUi;
-import org.springframework.jms.annotation.JmsListener;
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,7 +14,7 @@ public class OrderListener {
         this.kitchenUi = kitchenUi;
     }
 
-    @JmsListener(destination = "tacocloud.order.queue")
+    @RabbitListener(queues = "tacocloud.order.queue")
     public void receiveOrder(Order order){
         kitchenUi.displayOrder(order);
     }
