@@ -20,3 +20,7 @@ spring:
       exchange: tacocloud.orders
       routing-key: kitchens.central
       receive-timeout: 30000
+
+  kafka:
+    template:
+      default-topic: tacocloud.orders.topic
