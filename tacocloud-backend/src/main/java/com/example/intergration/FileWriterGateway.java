@@ -1,4 +1,4 @@
-package com.example.sia5;
+package com.example.intergration;
 
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.file.FileHeaders;
