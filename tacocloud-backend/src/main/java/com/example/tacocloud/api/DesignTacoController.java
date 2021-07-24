@@ -2,19 +2,11 @@ package com.example.tacocloud.api;
 
 import com.example.tacocloud.Taco;
 import com.example.tacocloud.data.TacoRepository;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(path="/design", produces = "application/json")
@@ -27,37 +19,31 @@ class DesignTacoController{
     }
 
     @GetMapping("/recent")
-    public CollectionModel<TacoResource> recentTacos(){
-        PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
-        List<Taco> tacos = tacoRepository.findAll(page).getContent();
-        CollectionModel<TacoResource> tacoResources = new TacoResourceAssembler().toCollectionModel(tacos);
-
-        tacoResources.add(
-                linkTo(methodOn(DesignTacoController.class).recentTacos()).withRel("recents")
-        );
-        return tacoResources;
+    public Flux<Taco> recentTacos(){
+        return tacoRepository.findAll().take(12);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Taco> tacoById(@PathVariable Long id){
-        Optional<Taco> tacoOptional = tacoRepository.findById(id);
-        return tacoOptional.map(taco -> new ResponseEntity<>(taco, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
+    public Mono<Taco> tacoById(@PathVariable Long id){
+        return tacoRepository.findById(id);
     }
 
     @PostMapping(consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public Taco postTaco(@RequestBody Taco taco){
+    public Mono<Taco> postTaco(@RequestBody Taco taco){
         return tacoRepository.save(taco);
     }
 
     @PutMapping(consumes = "application/json", path="/{tacoId}")
-    public Taco putTaco(@RequestBody Taco taco){
+    public Mono<Taco> putTaco(@RequestBody Taco taco){
         return tacoRepository.save(taco);
     }
 
     @PatchMapping(consumes = "application/json", path="/{tacoId}")
-    public Taco patchTaco(@RequestBody Taco patch, @PathVariable Long tacoId){
-        Taco taco = tacoRepository.findById(tacoId).get();
+    public Mono<Taco> patchTaco(@RequestBody Taco patch, @PathVariable Long tacoId){
+        Taco taco = tacoRepository.findById(tacoId).block();
+        if(taco == null)
+            return Mono.empty();
         if(patch.getTacoName() != null)
             taco.setTacoName(patch.getTacoName());
         if(patch.getCreatedAt() != null)

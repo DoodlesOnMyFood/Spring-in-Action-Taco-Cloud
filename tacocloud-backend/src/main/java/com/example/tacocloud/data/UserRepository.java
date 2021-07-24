@@ -2,7 +2,10 @@ package com.example.tacocloud.data;
 
 import com.example.tacocloud.User;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import reactor.core.publisher.Mono;
 
-public interface UserRepository extends CrudRepository<User, Long> {
-    User findByUsername(String username);
+public interface UserRepository extends ReactiveCrudRepository<User, Long> {
+    Mono<UserDetails> findByUsername(String username);
 }

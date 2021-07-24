@@ -9,10 +9,7 @@ import reactor.test.StepVerifier;
 import reactor.util.function.Tuple2;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 @SpringBootTest
@@ -246,5 +243,62 @@ class ReactiveApplicationTests {
 				.expectNextMatches(players::contains)
 				.expectNextMatches(players::contains)
 				.verifyComplete();
+	}
+
+	@Test
+	void buffer(){
+		Flux<List<String>> bufferedFruit = Flux.just(
+				"apple", "orange", "banana", "kiwi", "strawberry"
+		).buffer(3);
+
+		StepVerifier.create(bufferedFruit)
+				.expectNext(Arrays.asList("apple", "orange", "banana"))
+				.expectNext(Arrays.asList("kiwi", "strawberry"))
+				.verifyComplete();
+	}
+
+	@Test
+	void bufferAndFlatMap(){
+		Flux.just(
+				"apple", "orange", "banana", "kiwi", "strawberry")
+				.buffer(3)
+				.flatMap(x ->
+						Flux.fromIterable(x)
+								.map(String::toUpperCase)
+								.subscribeOn(Schedulers.parallel())
+								.log()
+						)
+				.subscribe();
+	}
+
+	@Test
+	void collectList(){
+		Flux<String> fruitFlux = Flux.just(
+				"apple", "orange", "banana", "kiwi", "strawberry"
+		);
+
+		Mono<List<String>> fruitListMono = fruitFlux.collectList();
+
+		StepVerifier.create(fruitListMono)
+				.expectNext(Arrays.asList(
+						"apple", "orange", "banana", "kiwi", "strawberry"
+				))
+				.verifyComplete();
+	}
+
+	@Test
+	void collectMap() {
+		Flux<String> animalFlux = Flux.just(
+				"aardvark", "elephant", "koala", "eagle", "kangaroo"
+		);
+		Mono<Map<Character, String>> animalMapMono = animalFlux.collectMap(a -> a.charAt(0));
+
+		StepVerifier.create(animalMapMono)
+				.expectNextMatches(map ->{
+					return map.size() == 3 &&
+							map.get('a').equals("aardvark") &&
+							map.get('e').equals("eagle") &&
+							map.get('k').equals("kangaroo");
+				}).verifyComplete();
 	}
 }
